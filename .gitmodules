@@ -1,0 +1,4 @@
+
+[submodule "Printer"]
+	path = Printer
+	url = https://github.com/nearengine/Python-Thermal-Printer.git
