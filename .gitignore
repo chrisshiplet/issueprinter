@@ -1,7 +1,8 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
 *.pyc
+*.pyo
+*.pyd
 
 # C extensions
 *.so
@@ -56,3 +57,6 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# App-specific
+printer.db
