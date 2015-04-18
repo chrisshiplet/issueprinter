@@ -13,7 +13,7 @@ printer.justify('C')
 printer.setSize('L')
 printer.inverseOn()
 
-printer.println('@nearengine')
+printer.println('  @nearengine  ')
 
 printer.inverseOff()
 printer.setSize('M')
