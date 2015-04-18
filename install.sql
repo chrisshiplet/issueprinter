@@ -1,6 +1,6 @@
 create table `issue_queue` (
   `id` integer primary key autoincrement,
-  `timestamp` datetime not null,
+  `timestamp` datetime not null default current_timestamp,
   `status` text not null,
   `url` text not null,
   `repo` text not null,
