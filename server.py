@@ -116,6 +116,7 @@ def queue_post():
 
     # abort now if this was an unassignment
     if payload['action'] == 'unassigned':
+        app.logger.debug('%s #%s %s unassigned' % (payload['repository']['name'], str(payload['issue']['number']), payload['issue']['title']))
         return ('', 202)
     # otherwise proceed to add assignment to print queue
     else:
