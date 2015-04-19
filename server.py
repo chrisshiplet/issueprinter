@@ -106,6 +106,11 @@ def queue_post():
         app.logger.warning('Action type missing, aborting')
         return ('', 400)
 
+    # abort on non-Issue hooks
+    if 'issue' not in payload:
+        app.logger.warning('Not an issue webhook, aborting')
+        return ('', 400)
+
     # abort on non-assignment notifications
     if payload['action'] not in ['unassigned', 'assigned']:
         app.logger.debug('Invalid action ' + payload['action'] + ', ignoring')
