@@ -9,7 +9,7 @@ For Development:
 * `pip install Flask`
 
 On the Pi:
-* `sudo apt-get install python-serial python-imaging python-unidecode`
+* `sudo apt-get install python-serial python-imaging python-unidecode sqlite3`
 * `git submodule update --init --recursive`
 * `sqlite3 printer.db < install.sql`
 * `pip install Flask`

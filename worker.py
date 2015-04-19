@@ -44,10 +44,10 @@ def printissue(issue):
     printer.sleep()
 
 printissue({
-    assignee: 'nearengine',
-    repo: 'shiplet.co',
-    number: 420,
-    timestamp: 'Apr 20 2015 4:20:00',
-    title: 'Stuff is broke',
-    labels: 'P-High,C-Low'
+    'assignee': 'nearengine',
+    'repo': 'shiplet.co',
+    'number': 420,
+    'timestamp': 'Apr 20 2015 4:20:00',
+    'title': 'Stuff is broke',
+    'labels': 'P-High,C-Low'
 })
