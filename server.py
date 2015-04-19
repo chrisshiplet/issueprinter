@@ -114,9 +114,14 @@ def queue_post():
     # remove existing issue assignments each time to prevent dupes
     query_db('delete from issue_queue where url = ? and status = ?', (payload['repository']['url'], 'new'))
 
+    # convert timestamp to az time for logging
+    timestamp = payload['issue']['updated_at']
+    timestamp_dt = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
+    timestamp_dt_str = timestamp_dt.strftime('%b %d %Y %H:%M:%S')
+
     # abort now if this was an unassignment
     if payload['action'] == 'unassigned':
-        app.logger.debug('%s #%s %s unassigned' % (payload['repository']['name'], str(payload['issue']['number']), payload['issue']['title']))
+        app.logger.debug('%s #%s "%s" unassigned at %s' % (payload['repository']['name'], str(payload['issue']['number']), payload['issue']['title'], timestamp_dt_str))
         return ('', 202)
     # otherwise proceed to add assignment to print queue
     else:
@@ -126,16 +131,11 @@ def queue_post():
             labels.append(label['name'])
         labels = ','.join(map(str, labels))
 
-        # convert timestamp to az time for logging
-        timestamp = payload['issue']['updated_at']
-        timestamp_dt = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
-        timestamp_dt_str = timestamp_dt.strftime('%b %d %Y %H:%M:%S')
-
         # execute query
         query_db('insert into issue_queue (timestamp, status, url, repo, number, title, assignee, labels) values (?, ?, ?, ?, ?, ?, ?, ?)', (timestamp, 'new', payload['repository']['url'], payload['repository']['name'], payload['issue']['number'], payload['issue']['title'], payload['assignee']['login'], labels))
 
         # log assignment and return 202 accepted
-        app.logger.debug('%s #%s %s %s to %s at %s with labels [%s]' % (payload['repository']['name'], str(payload['issue']['number']), payload['issue']['title'], payload['action'], payload['assignee']['login'], timestamp_dt_str, labels))
+        app.logger.debug('%s #%s "%s" %s to %s at %s with labels [%s]' % (payload['repository']['name'], str(payload['issue']['number']), payload['issue']['title'], payload['action'], payload['assignee']['login'], timestamp_dt_str, labels))
         return ('', 202)
 
 # bootstrap flask app
