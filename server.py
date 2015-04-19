@@ -134,7 +134,7 @@ def queue_post():
         query_db('insert into issue_queue (timestamp, status, url, repo, number, title, assignee, labels) values (?, ?, ?, ?, ?, ?, ?, ?)', (timestamp, 'new', payload['repository']['url'], payload['repository']['name'], payload['issue']['number'], payload['issue']['title'], payload['assignee']['login'], labels))
 
         # log assignment and return 202 accepted
-        app.logger.debug(payload['repository']['name'] + ' ' + '#' + str(payload['issue']['number']) + ' ' + payload['issue']['title'] + ' ' + payload['action'] + ' to ' + payload['assignee']['login'] + ' at ' + timestamp_dt_str + ' with labels [' + labels + ']')
+        app.logger.debug('%s #%s %s %s to %s at %s with labels [%s]' % (payload['repository']['name'], str(payload['issue']['number']), payload['issue']['title'], payload['action'], payload['assignee']['login'], timestamp_dt_str, labels))
         return ('', 202)
 
 # bootstrap flask app
