@@ -37,7 +37,8 @@ def handle_error(e):
     code = 500
     if isinstance(e, HTTPException):
         code = e.code
-    app.logger.error(e)
+    if code == 500:
+        app.logger.error(e)
     return jsonify(error=str(e)), code
 
 # manually assign error handler for every possible status code...
