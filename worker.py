@@ -4,41 +4,50 @@ from Printer.Adafruit_Thermal import *
 
 printer = Adafruit_Thermal("/dev/ttyAMA0", 19200, timeout=5)
 
-printer.wake()
-printer.flush()
-printer.setDefault()
+def printissue(issue):
+    printer.wake()
+    printer.flush()
+    printer.setDefault()
 
-printer.setLineHeight(20)
-printer.justify('C')
-printer.setSize('L')
-printer.inverseOn()
+    printer.setLineHeight(20)
+    printer.justify('C')
+    printer.setSize('L')
+    printer.inverseOn()
 
-printer.println('  @nearengine  ')
+    printer.println('  @%s  ' % (issue['assignee']))
 
-printer.inverseOff()
-printer.setSize('M')
+    printer.inverseOff()
+    printer.setSize('M')
 
-printer.println('researchaz.org #141')
+    printer.println('%s #%s' % (issue['repo'], str(issue['number'])))
 
-printer.setLineHeight()
-printer.setSize('S')
+    printer.setLineHeight()
+    printer.setSize('S')
 
-printer.println('Wed, 18 Feb 2015 11:16 pm MST')
+    printer.println('%s' % (issue['timestamp']))
 
-printer.feed(1)
-printer.justify('L')
+    printer.feed(1)
+    printer.justify('L')
 
-printer.println('Show Preview doesn\'t work without edit to body for existing blog post')
+    printer.println(issue['title'])
 
-printer.setLineHeight(40)
+    printer.setLineHeight(40)
 
-printer.println('*** BUG')
-printer.println('*** HIGH PRIORITY')
-printer.println('*** MEDIUM COMPLEXITY')
+    for label in issue['labels'].split(','):
+        printer.println('*** %s' % (upper(label)))
 
-printer.setLineHeight()
-printer.feed(3)
+    printer.setLineHeight()
+    printer.feed(3)
 
-printer.setDefault()
-printer.flush()
-printer.sleep()
+    printer.setDefault()
+    printer.flush()
+    printer.sleep()
+
+printissue({
+    assignee: 'nearengine',
+    repo: 'shiplet.co',
+    number: 420,
+    timestamp: 'Apr 20 2015 4:20:00',
+    title: 'Stuff is broke',
+    labels: 'P-High,C-Low'
+})
