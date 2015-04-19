@@ -44,6 +44,10 @@ def handle_error(e):
 for code in HTTP_STATUS_CODES:
     app.register_error_handler(code, handle_error)
 
+@app.route('/ping/', methods=['GET',])
+def ping():
+    return('', 200)
+
 @app.route('/', methods=['GET',])
 def queue_get():
     rows = query_db('select * from issue_queue order by id desc limit 100')
