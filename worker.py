@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 from Printer.Adafruit_Thermal import *
 
 printer = Adafruit_Thermal("/dev/ttyAMA0", 19200, timeout=5)

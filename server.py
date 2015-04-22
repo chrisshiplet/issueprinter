@@ -4,7 +4,9 @@ import sqlite3
 import hashlib
 import hmac
 import json
+from time import sleep
 from datetime import *
+from threading import Thread
 from flask import Flask, abort, jsonify, request, g
 from werkzeug import HTTP_STATUS_CODES
 from werkzeug.exceptions import HTTPException
@@ -22,9 +24,29 @@ def query_db(query, args=(), one=False):
     cur.close()
     return (rv[0] if rv else None) if one else rv
 
+def queue_worker_task():
+    with app.app_context():
+        while True:
+            row = query_db('select * from issue_queue where status=? order by id asc limit 1', ('new',), True)
+            app.logger.debug('Checking queue at %s...' % (datetime.now().strftime('%b %d %Y %H:%M:%S')))
+            if row:
+                app.logger.debug('Worker received task: %s' % (str(row)))
+                cur = get_db().execute('update issue_queue set status=? where id=?', ('printing', row[0]))
+                get_db().commit()
+                cur.close()
+                if cur.rowcount != 1:
+                    app.logger.error('Queue item #%s status could not be updated in database' % (row[0]))
+                #else:
+                    # PRINT!
+            sleep(3)
+
 app = Flask(__name__)
 app_env = os.getenv('APP_ENV', 'development')
 app_secret = os.getenv('APP_SECRET', '')
+
+queue_worker = Thread(target=queue_worker_task, args=())
+queue_worker.setDaemon(True)
+queue_worker.start()
 
 @app.teardown_appcontext
 def close_connection(exception):
@@ -148,4 +170,4 @@ if __name__ == '__main__':
     if app_env == 'production':
         app.run(host='0.0.0.0',port=4000,debug=False)
     else:
-        app.run(host='0.0.0.0',port=4000,debug=True)
+        app.run(host='0.0.0.0',port=4000,debug=True,use_reloader=False)
