@@ -28,16 +28,40 @@ def queue_worker_task():
     with app.app_context():
         while True:
             row = query_db('select * from issue_queue where status=? order by id asc limit 1', ('new',), True)
+
             app.logger.debug('Checking queue at %s...' % (datetime.now().strftime('%b %d %Y %H:%M:%S')))
+
             if row:
                 app.logger.debug('Worker received task: %s' % (str(row)))
+
                 cur = get_db().execute('update issue_queue set status=? where id=?', ('printing', row[0]))
                 get_db().commit()
                 cur.close()
+
                 if cur.rowcount != 1:
                     app.logger.error('Queue item #%s status could not be updated in database' % (row[0]))
-                #else:
-                    # PRINT!
+                else:
+                    issue = {
+                        'assignee': row[7],
+                        'repo': row[4],
+                        'number': row[5],
+                        'timestamp': row[1],
+                        'title': row[6],
+                        'labels': row[8]
+                    }
+
+                    if app_env == 'production':
+                        from printer import print_issue
+                        printer.print_issue(issue)
+                    else:
+                        app.logger.debug('Not printing in development mode')
+
+                    cur = get_db().execute('update issue_queue set status=? where id=?', ('complete', row[0]))
+                    get_db().commit()
+                    cur.close()
+
+                    if cur.rowcount != 1:
+                        app.logger.error('Queue item #%s status could not be updated in database' % (row[0]))
             sleep(3)
 
 app = Flask(__name__)

@@ -1,9 +1,9 @@
 #!/usr/bin/python
 from Printer.Adafruit_Thermal import *
 
-printer = Adafruit_Thermal("/dev/ttyAMA0", 19200, timeout=5)
+def print_issue(issue):
+    printer = Adafruit_Thermal("/dev/ttyAMA0", 19200, timeout=5)
 
-def printissue(issue):
     printer.wake()
     printer.flush()
     printer.setDefault()
@@ -38,12 +38,3 @@ def printissue(issue):
     printer.setDefault()
     printer.flush()
     printer.sleep()
-
-printissue({
-    'assignee': 'nearengine',
-    'repo': 'shiplet.co',
-    'number': 420,
-    'timestamp': 'Apr 20 2015 4:20:00',
-    'title': 'Stuff is broke',
-    'labels': 'P-High,C-Low'
-})
