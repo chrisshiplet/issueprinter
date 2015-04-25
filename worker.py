@@ -8,7 +8,6 @@ def printissue(issue):
     printer.flush()
     printer.setDefault()
 
-    printer.setLineHeight(20)
     printer.justify('C')
     printer.setSize('L')
     printer.inverseOn()
@@ -16,7 +15,6 @@ def printissue(issue):
     printer.println('  @%s  ' % (issue['assignee']))
 
     printer.inverseOff()
-    printer.setLineHeight()
     printer.setSize('M')
 
     printer.println('%s #%s' % (issue['repo'], str(issue['number'])))
@@ -27,14 +25,12 @@ def printissue(issue):
 
     printer.feed(1)
     printer.justify('L')
-    printer.setLineHeight(40)
 
     printer.println(issue['title'])
 
     for label in issue['labels'].split(','):
         printer.println('*** %s' % (label.upper()))
 
-    printer.setLineHeight()
     printer.feed(3)
 
     printer.setDefault()
