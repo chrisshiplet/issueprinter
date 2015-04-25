@@ -52,7 +52,7 @@ def queue_worker_task():
 
                     if app_env == 'production':
                         from printer import print_issue
-                        printer.print_issue(issue)
+                        print_issue(issue)
                     else:
                         app.logger.debug('Not printing in development mode')
 
@@ -62,7 +62,7 @@ def queue_worker_task():
 
                     if cur.rowcount != 1:
                         app.logger.error('Queue item #%s status could not be updated in database' % (row[0]))
-            sleep(3)
+            sleep(4)
 
 app = Flask(__name__)
 app_env = os.getenv('APP_ENV', 'development')
