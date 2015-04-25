@@ -16,21 +16,20 @@ def printissue(issue):
     printer.println('  @%s  ' % (issue['assignee']))
 
     printer.inverseOff()
+    printer.setLineHeight()
     printer.setSize('M')
 
     printer.println('%s #%s' % (issue['repo'], str(issue['number'])))
 
-    printer.setLineHeight()
     printer.setSize('S')
 
     printer.println('%s' % (issue['timestamp']))
 
     printer.feed(1)
     printer.justify('L')
+    printer.setLineHeight(40)
 
     printer.println(issue['title'])
-
-    printer.setLineHeight(40)
 
     for label in issue['labels'].split(','):
         printer.println('*** %s' % (label.upper()))
