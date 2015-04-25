@@ -33,7 +33,7 @@ def printissue(issue):
     printer.setLineHeight(40)
 
     for label in issue['labels'].split(','):
-        printer.println('*** %s' % (upper(label)))
+        printer.println('*** %s' % (label.upper()))
 
     printer.setLineHeight()
     printer.feed(3)
