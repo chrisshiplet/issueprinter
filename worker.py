@@ -8,6 +8,7 @@ def printissue(issue):
     printer.flush()
     printer.setDefault()
 
+    printer.setLineHeight(20)
     printer.justify('C')
     printer.setSize('L')
     printer.inverseOn()
@@ -24,6 +25,7 @@ def printissue(issue):
     printer.println('%s' % (issue['timestamp']))
 
     printer.feed(1)
+    printer.setLineHeight(40)
     printer.justify('L')
 
     printer.println(issue['title'])
