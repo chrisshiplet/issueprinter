@@ -59,4 +59,4 @@ docs/_build/
 target/
 
 # App-specific
-printer.db
+main.db

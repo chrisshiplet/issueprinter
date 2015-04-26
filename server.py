@@ -11,12 +11,14 @@ from flask import Flask, abort, jsonify, request, g
 from werkzeug import HTTP_STATUS_CODES
 from werkzeug.exceptions import HTTPException
 
+# create a database connection
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = sqlite3.connect('printer.db')
+        db = g._database = sqlite3.connect('main.db')
     return db
 
+# helper method for returning rows
 def query_db(query, args=(), one=False):
     cur = get_db().execute(query, args)
     rv = cur.fetchall()
@@ -24,10 +26,13 @@ def query_db(query, args=(), one=False):
     cur.close()
     return (rv[0] if rv else None) if one else rv
 
+# process queue in a separate thread
 def queue_worker_task():
     with app.app_context():
         while True:
             row = query_db('select * from issue_queue where status=? order by id asc limit 1', ('new',), True)
+
+            query_db('update issue_queue set status=? where status=?', ('error', 'printing'))
 
             app.logger.debug('Checking queue at %s...' % (datetime.now().strftime('%b %d %Y %H:%M:%S')))
 
@@ -64,20 +69,19 @@ def queue_worker_task():
                         app.logger.error('Queue item #%s status could not be updated in database' % (row[0]))
             sleep(4)
 
+# define app and settings
 app = Flask(__name__)
 app_env = os.getenv('APP_ENV', 'development')
 app_secret = os.getenv('APP_SECRET', '')
 
-queue_worker = Thread(target=queue_worker_task, args=())
-queue_worker.setDaemon(True)
-queue_worker.start()
-
+# try closing the db after each request if we opened it
 @app.teardown_appcontext
 def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
 
+# for HTTP errors display original code, for app exceptions just issue a 500
 @app.errorhandler(Exception)
 def handle_error(e):
     code = 500
@@ -87,14 +91,12 @@ def handle_error(e):
         app.logger.error(e)
     return jsonify(error=str(e)), code
 
-# manually assign error handler for every possible status code...
-for code in HTTP_STATUS_CODES:
-    app.register_error_handler(code, handle_error)
-
+# ping endpoint
 @app.route('/ping/', methods=['GET',])
 def ping():
     return('', 200)
 
+# list queue endpoint
 @app.route('/', methods=['GET',])
 def queue_get():
     rows = query_db('select * from issue_queue order by id desc limit 100')
@@ -113,6 +115,7 @@ def queue_get():
         })
     return json.dumps(rv)
 
+# webhook handler endpoint
 @app.route('/', methods=['POST',])
 def queue_post():
     payload = request.get_json()
@@ -165,7 +168,7 @@ def queue_post():
     # remove existing issue assignments each time to prevent dupes
     query_db('delete from issue_queue where url = ? and status = ?', (payload['repository']['url'], 'new'))
 
-    # convert timestamp to az time for logging
+    # convert timestamp from utc to az time
     timestamp = payload['issue']['updated_at']
     timestamp_dt = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
     timestamp_dt_str = timestamp_dt.strftime('%b %d %Y %H:%M:%S')
@@ -182,14 +185,21 @@ def queue_post():
             labels.append(label['name'])
         labels = ','.join(map(str, labels))
 
-        # execute query
-        query_db('insert into issue_queue (timestamp, status, url, repo, number, title, assignee, labels) values (?, ?, ?, ?, ?, ?, ?, ?)', (timestamp, 'new', payload['repository']['url'], payload['repository']['name'], payload['issue']['number'], payload['issue']['title'], payload['assignee']['login'], labels))
+        query_db('insert into issue_queue (timestamp, status, url, repo, number, title, assignee, labels) values (?, ?, ?, ?, ?, ?, ?, ?)', (timestamp_dt_str, 'new', payload['repository']['url'], payload['repository']['name'], payload['issue']['number'], payload['issue']['title'], payload['assignee']['login'], labels))
 
-        # log assignment and return 202 accepted
         app.logger.debug('%s #%s "%s" %s to %s at %s with labels [%s]' % (payload['repository']['name'], str(payload['issue']['number']), payload['issue']['title'], payload['action'], payload['assignee']['login'], timestamp_dt_str, labels))
         return ('', 202)
 
-# bootstrap flask app
+# start the print queue
+queue_worker = Thread(target=queue_worker_task, args=())
+queue_worker.setDaemon(True)
+queue_worker.start()
+
+# manually assign error handler for every possible status code...
+for code in HTTP_STATUS_CODES:
+    app.register_error_handler(code, handle_error)
+
+# start flask app
 if __name__ == '__main__':
     if app_env == 'production':
         app.run(host='0.0.0.0',port=4000,debug=False)

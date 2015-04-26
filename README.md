@@ -5,14 +5,14 @@ Small set of python utilities for running a GitHub Issue Printer on a Raspberry 
 
 For Development:
 * `git submodule update --init --recursive`
-* `sqlite3 printer.db < install.sql`
-* `pip install Flask`
+* `sqlite3 main.db < install.sql`
+* `sudo easy_install Flask`
 
 On the Pi:
-* `sudo apt-get install python-serial python-imaging python-unidecode sqlite3`
+* `sudo apt-get install python-setuptools python-serial python-imaging python-unidecode sqlite3`
 * `git submodule update --init --recursive`
-* `sqlite3 printer.db < install.sql`
-* `pip install Flask`
+* `sqlite3 main.db < install.sql`
+* `sudo easy_install Flask`
 
 Webhook:
 * Create a new GitHub webhook pointing to `http://hostname:4000/` with content type `application/json` and a secret, if desired
