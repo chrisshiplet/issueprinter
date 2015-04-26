@@ -98,7 +98,7 @@ def ping():
     return('', 200)
 
 # list queue endpoint
-@app.route('/', methods=['GET',])
+@app.route('/queue', methods=['GET',])
 def queue_get():
     rows = query_db('select * from issue_queue order by id desc limit 100')
     rv = []
@@ -117,7 +117,7 @@ def queue_get():
     return json.dumps(rv)
 
 # webhook handler endpoint
-@app.route('/', methods=['POST',])
+@app.route('/queue', methods=['POST',])
 def queue_post():
     payload = request.get_json()
     date = request.headers.get("Date", "")
