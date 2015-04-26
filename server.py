@@ -167,7 +167,7 @@ def queue_post():
         return ('', 400)
 
     # remove existing issue assignments each time to prevent dupes
-    query_db('delete from issue_queue where url = ? and status = ?', (payload['repository']['url'], 'new'))
+    query_db('delete from issue_queue where url = ? and status = ?', (payload['issue']['html_url'], 'new'))
 
     # convert timestamp from utc to az time
     timestamp = payload['issue']['updated_at']
@@ -186,7 +186,7 @@ def queue_post():
             labels.append(label['name'])
         labels = ','.join(map(str, labels))
 
-        query_db('insert into issue_queue (timestamp, status, url, repo, number, title, assignee, labels) values (?, ?, ?, ?, ?, ?, ?, ?)', (timestamp_dt_str, 'new', payload['repository']['url'], payload['repository']['name'], payload['issue']['number'], payload['issue']['title'], payload['assignee']['login'], labels))
+        query_db('insert into issue_queue (timestamp, status, url, repo, number, title, assignee, labels) values (?, ?, ?, ?, ?, ?, ?, ?)', (timestamp_dt_str, 'new', payload['issue']['html_url'], payload['repository']['name'], payload['issue']['number'], payload['issue']['title'], payload['assignee']['login'], labels))
 
         app.logger.debug('%s #%s "%s" %s to %s at %s with labels [%s]' % (payload['repository']['name'], str(payload['issue']['number']), payload['issue']['title'], payload['action'], payload['assignee']['login'], timestamp_dt_str, labels))
         return ('', 202)
