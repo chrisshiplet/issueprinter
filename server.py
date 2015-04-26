@@ -4,6 +4,7 @@ import sqlite3
 import hashlib
 import hmac
 import json
+import logging
 from time import sleep
 from datetime import *
 from threading import Thread
@@ -203,6 +204,7 @@ for code in HTTP_STATUS_CODES:
 if __name__ == '__main__':
     if app_env == 'production':
         app.logger.setLevel(logging.WARNING)
+        logging.basicConfig(filename='app.log',level=logging.WARNING)
         app.run(host='0.0.0.0',port=4000,debug=False)
     else:
         app.run(host='0.0.0.0',port=4000,debug=True,use_reloader=False)
