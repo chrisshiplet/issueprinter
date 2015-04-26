@@ -202,6 +202,7 @@ for code in HTTP_STATUS_CODES:
 # start flask app
 if __name__ == '__main__':
     if app_env == 'production':
+        app.logger.setLevel(logging.WARNING)
         app.run(host='0.0.0.0',port=4000,debug=False)
     else:
         app.run(host='0.0.0.0',port=4000,debug=True,use_reloader=False)
