@@ -15,7 +15,7 @@ On the Pi:
 * `sudo easy_install Flask`
 
 Webhook:
-* Create a new GitHub webhook pointing to `http://hostname:4000/` with content type `application/json` and a secret, if desired
+* Create a new GitHub webhook pointing to `http://hostname:4000/queue` with content type `application/json` and a secret, if desired
 * Select only the "Issues" event
 
 ## Running

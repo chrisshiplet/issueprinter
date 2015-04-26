@@ -8,7 +8,7 @@ import logging
 from time import sleep
 from datetime import *
 from threading import Thread
-from flask import Flask, abort, jsonify, request, g
+from flask import Flask, abort, jsonify, request, g, send_from_directory
 from werkzeug import HTTP_STATUS_CODES
 from werkzeug.exceptions import HTTPException
 
@@ -71,7 +71,7 @@ def queue_worker_task():
             sleep(4)
 
 # define app and settings
-app = Flask(__name__)
+app = Flask(__name__, static_folder='ui')
 app_env = os.getenv('APP_ENV', 'development')
 app_secret = os.getenv('APP_SECRET', '')
 
@@ -92,9 +92,19 @@ def handle_error(e):
         app.logger.error(e)
     return jsonify(error=str(e)), code
 
+# serve spa ui
+@app.route('/')
+def root_get():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/index.html')
+@app.route('/bundle.js')
+def bundle_get():
+    return send_from_directory(app.static_folder, request.path[1:])
+
 # ping endpoint
 @app.route('/ping/', methods=['GET',])
-def ping():
+def ping_get():
     return('', 200)
 
 # list queue endpoint
