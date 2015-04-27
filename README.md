@@ -13,6 +13,13 @@ On the Pi:
 * `git submodule update --init --recursive`
 * `sqlite3 main.db < install.sql`
 * `sudo easy_install Flask`
+* `crontab -e`
+* Add the following lines, using the full path of the scripts:
+```
+  @reboot APP_ENV=production APP_SECRET=password1 python /home/pi/issueprinter/server.pi &
+  @reboot python /home/pi/issueprinter/beacon.py &
+```
+* `sudo shutdown -r now`
 
 Webhook:
 * Create a new GitHub webhook pointing to `http://hostname:4000/` with content type `application/json` and a secret, if desired
